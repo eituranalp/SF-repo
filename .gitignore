@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.env
+.venv
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# Audio files
+*.ogg
+*.wav
+*.mp3
+audio_chunks/raw/*
+audio_chunks/wav/*
+!audio_chunks/raw/.gitkeep
+!audio_chunks/wav/.gitkeep
+
+# Windows
+Thumbs.db
+Desktop.ini

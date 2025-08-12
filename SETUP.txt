@@ -1,0 +1,57 @@
+Audio Processing System Setup Guide
+================================
+
+This system consists of two components: a server and a client that need to run simultaneously.
+
+Server Setup
+-----------
+1. Open a terminal and navigate to the server directory:
+   cd server
+
+2. Create and activate a virtual environment:
+   # Create venv IF there isn't one
+   python -m venv .venv
+   
+   # Activate venv (choose based on your shell):
+   # For Git Bash on Windows:
+   source .venv/Scripts/activate
+   # For Windows CMD:
+   .venv\Scripts\activate
+
+3. Install requirements:
+   pip install -r requirements.txt
+
+4. Run the server:
+   python server.py
+
+
+Client Setup
+-----------
+1. Open a NEW terminal and navigate to the client directory:
+   cd client
+
+2. Create and activate a virtual environment:
+   # Create venv IF there isn't one
+   python -m venv .venv
+   
+   # Activate venv (choose based on your shell):
+   # For Git Bash on Windows:
+   source .venv/Scripts/activate
+   # For Windows CMD:
+   .venv\Scripts\activate
+
+3. Install requirements:
+   pip install -r requirements.txt
+
+4. Run the client:
+   python audio_ws.py
+   # Or for 500ms version:
+   python audio_ws_500ms.py
+
+Important Notes
+-------------
+- The server must be started before running the client
+- Both components must run simultaneously in separate terminals
+- Make sure ffmpeg.exe (in client/bin) is accessible
+- Each component has its own virtual environment and requirements
+- Audio files (.ogg, .wav) are gitignored to keep the repository clean
