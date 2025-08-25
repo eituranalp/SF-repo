@@ -12,10 +12,15 @@ SYSTEM_DEVICE_NAME = "Voicemeeter Out B1"  # Voicemeeter system audio
 MIC_DEVICE_NAME = "Voicemeeter Out B2"  # Voicemeeter microphone
 SAMPLE_RATE = 16000
 CHANNELS = 1  # Each input is mono
-BUFFER_SIZE = int(SAMPLE_RATE * 0.5)  # 500ms buffer
+
+# Configurable chunk duration (ms). Defaults to 200ms. Set env AUDIO_CHUNK_MS to override (e.g., 100).
+CHUNK_DURATION_MS = int(os.getenv("AUDIO_CHUNK_MS", "200"))
+CHUNK_DURATION_SEC = CHUNK_DURATION_MS / 1000.0
+BUFFER_SIZE = int(SAMPLE_RATE * CHUNK_DURATION_SEC)
+
 WS_SERVER_URL = "ws://localhost:8000/audio"
 
-print("Starting OGG Opus audio streaming client...")
+print("Starting raw PCM audio streaming client...")
 
 def find_device_index(name):
     """Find device index by name"""
@@ -66,14 +71,14 @@ async def stream_audio():
         print("Connected! Starting audio streaming...")
         
         while True:
-            # Wait for 500ms of audio data
-            await asyncio.sleep(0.5)
+            # Wait for the configured amount of audio data
+            await asyncio.sleep(CHUNK_DURATION_SEC)
             
             with audio_lock:
                 if len(mic_buffer) < BUFFER_SIZE or len(system_buffer) < BUFFER_SIZE:
                     continue
                     
-                # Get 500ms of both microphone and system audio
+                # Get the configured chunk of both microphone and system audio
                 mic_chunk = np.array(mic_buffer[:BUFFER_SIZE], dtype=np.int16)
                 sys_chunk = np.array(system_buffer[:BUFFER_SIZE], dtype=np.int16)
                 
@@ -86,7 +91,7 @@ async def stream_audio():
             pcm_data = stereo_audio.tobytes()
             
             chunk_count += 1
-            print(f"Sending chunk #{chunk_count}: {len(pcm_data)} bytes")
+            print(f"Sending chunk #{chunk_count}: {len(pcm_data)} bytes (~{CHUNK_DURATION_MS}ms)")
             
             # Send raw PCM data
             if pcm_data and len(pcm_data) > 0:
@@ -100,7 +105,7 @@ async def main():
     print(f"System device: {system_index} ({SYSTEM_DEVICE_NAME})")
     print(f"Mic device: {mic_index} ({MIC_DEVICE_NAME})")
     print(f"Sample rate: {SAMPLE_RATE} Hz")
-    print(f"Chunk size: {BUFFER_SIZE} samples ({BUFFER_SIZE/SAMPLE_RATE*1000:.0f}ms)")
+    print(f"Chunk size: {BUFFER_SIZE} samples ({CHUNK_DURATION_MS}ms)")
     print("=" * 30)
     
     try:

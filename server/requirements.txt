@@ -1,5 +1,4 @@
 fastapi==0.109.2
 uvicorn[standard]==0.27.1
-websockets==12.0
 aiohttp==3.9.3
 python-dotenv==1.0.1
