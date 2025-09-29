@@ -1,0 +1,73 @@
+AI Sales Funnel Call Assistant - Setup Guide
+==========================================
+
+This system consists of two components: a transcription server and audio client that work together
+for real-time call transcription and analysis.
+
+Prerequisites
+------------
+- Python 3.8+
+- Voicemeeter (for audio routing): https://vb-audio.com/Voicemeeter/
+- Deepgram API Key: https://deepgram.com/
+
+Environment Setup
+----------------
+1. Create a .env file in the project root with your API key:
+   
+   DEEPGRAM_API_KEY=your_deepgram_api_key
+   AUDIO_DEBUG=false
+   AUDIO_CHUNK_MS=200
+
+Server Setup
+-----------
+1. Navigate to the audio directory:
+   cd audio
+
+2. Create and activate a virtual environment:
+   python -m venv .venv
+   
+   # For Git Bash on Windows:
+   source .venv/Scripts/activate
+   # For Windows CMD:
+   .venv\Scripts\activate
+
+3. Install requirements:
+   pip install -r server_requirements.txt
+
+4. Run the transcription server:
+   python transcription_server.py
+
+Client Setup
+-----------
+1. Open a NEW terminal and navigate to the audio directory:
+   cd audio
+
+2. Create and activate a virtual environment (if not already done):
+   python -m venv .venv
+   source .venv/Scripts/activate  # Git Bash
+   # OR .venv\Scripts\activate     # Windows CMD
+
+3. Install client requirements:
+   pip install -r client_requirements.txt
+
+4. Configure Voicemeeter:
+   - Route your system audio to "Voicemeeter Out B1"
+   - Route your microphone to "Voicemeeter Out B2"
+
+5. Run the audio client:
+   python real_time_audio_client.py
+
+Testing & Development
+-------------------
+- Test scripts are located in the audio/tests/ directory
+- Run 500ms audio test: python audio/tests/audio_client_500ms_test.py
+- Enable audio debugging: Set AUDIO_DEBUG=true in .env
+
+Important Notes
+-------------
+- The transcription server must be started before running the client
+- Both components must run simultaneously in separate terminals  
+- Voicemeeter must be configured correctly for audio capture
+- Transcription files are saved to audio/transcriptions/
+- ffmpeg.exe (in setup/) is used by some test utilities
+- Set appropriate environment variables for API keys and debugging

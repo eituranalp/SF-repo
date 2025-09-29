@@ -2,25 +2,114 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
 .env
 .venv
+env/
 venv/
 ENV/
+env.bak/
+venv.bak/
+.venv/
 
-# IDE
+# Environment variables
+.env.local
+.env.*.local
+
+# Audio files (large binary files)
+*.wav
+*.ogg
+*.mp3
+*.flac
+*.aac
+*.m4a
+*.wma
+
+# Audio debug output
+audio_chunks/
+*.pcm
+
+# Transcription outputs (may contain sensitive data)
+transcriptions/
+*.transcript
+*.srt
+
+# IDE and editor files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Audio files
-*.ogg
-*.wav
-*.mp3
-audio_chunks/raw/*
-audio_chunks/wav/*
-!audio_chunks/raw/.gitkeep
-!audio_chunks/wav/.gitkeep
-
-# Windows
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-Desktop.ini
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# API keys and secrets
+.env
+.env.production
+.env.development
+secrets.txt
+config.ini
+
+# FFmpeg binaries (large executable files)
+# Uncomment if you want to exclude ffmpeg.exe
+# scripts/ffmpeg.exe
+
+# Deepgram API responses cache
+.deepgram_cache/

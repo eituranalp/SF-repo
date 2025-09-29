@@ -7,14 +7,14 @@ from pathlib import Path
 
 def live_monitor():
     """Monitor audio streaming in real-time"""
-    print("📡 LIVE STREAMING MONITOR")
+    print("LIVE STREAMING MONITOR")
     print("=" * 40)
     print("Monitoring server/audio_chunks/ directory...")
     print("Press Ctrl+C to stop\n")
     
     server_dir = Path("../server/audio_chunks")
     if not server_dir.exists():
-        print("❌ Server audio directory not found")
+        print("Server audio directory not found")
         return
     
     last_count = 0
@@ -50,13 +50,13 @@ def live_monitor():
                 
                 # Determine mode
                 if files_per_sec > 7:
-                    mode = "🚀 HIGH-FREQ"
+                    mode = "HIGH-FREQ"
                     color = "🟢"
                 elif files_per_sec > 1.5:
-                    mode = "📡 STANDARD"
+                    mode = "STANDARD"
                     color = "🟡"
                 else:
-                    mode = "🐌 SLOW"
+                    mode = "SLOW"
                     color = "🔴"
                 
                 # Display update
@@ -72,7 +72,7 @@ def live_monitor():
             time.sleep(1)  # Update every second
             
     except KeyboardInterrupt:
-        print(f"\n📊 FINAL SESSION STATS:")
+        print(f"\nFINAL SESSION STATS:")
         print(f"  Duration: {session_time:.1f} seconds")
         print(f"  Total files: {total_files}")
         print(f"  Total data: {total_size:,} bytes ({total_size/1024:.1f} KB)")

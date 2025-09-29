@@ -9,7 +9,7 @@ from pathlib import Path
 def test_audio_files():
     """Test the recorded audio files"""
     
-    print("🎧 AUDIO FILE TESTING SUITE")
+    print("AUDIO FILE TESTING SUITE")
     print("=" * 50)
     
     # Find all OGG files in server directory
@@ -17,21 +17,21 @@ def test_audio_files():
     ogg_files = list(server_dir.glob("*.ogg"))
     
     if not ogg_files:
-        print("❌ No audio files found in server/audio_chunks/")
+        print("No audio files found in server/audio_chunks/")
         return
     
-    print(f"📁 Found {len(ogg_files)} audio files")
-    print(f"📂 Directory: {server_dir.absolute()}")
+    print(f"Found {len(ogg_files)} audio files")
+    print(f"Directory: {server_dir.absolute()}")
     
     # Test the latest/largest file
     latest_file = max(ogg_files, key=lambda f: f.stat().st_size)
-    print(f"\n🎯 Testing file: {latest_file.name}")
-    print(f"📊 Size: {latest_file.stat().st_size} bytes")
+    print(f"\nTesting file: {latest_file.name}")
+    print(f"Size: {latest_file.stat().st_size} bytes")
     
     # Get detailed info about the file
     ffmpeg_path = os.path.join(os.path.dirname(__file__), 'bin', 'ffmpeg.exe')
     
-    print("\n🔍 AUDIO PROPERTIES:")
+    print("\nAUDIO PROPERTIES:")
     print("-" * 30)
     
     info_cmd = [
@@ -48,10 +48,10 @@ def test_audio_files():
                 print(f"  {line.strip()}")
                 
     except Exception as e:
-        print(f"❌ Error getting file info: {e}")
+        print(f"Error getting file info: {e}")
     
     # Extract channels for testing
-    print(f"\n🎨 CHANNEL SEPARATION TEST:")
+    print(f"\nCHANNEL SEPARATION TEST:")
     print("-" * 30)
     
     try:
@@ -64,9 +64,9 @@ def test_audio_files():
         
         result = subprocess.run(left_cmd, capture_output=True, timeout=10)
         if result.returncode == 0:
-            print("✅ Left channel (MIC) extracted → test_mic_channel.wav")
+            print("Left channel (MIC) extracted -> test_mic_channel.wav")
         else:
-            print("❌ Failed to extract left channel")
+            print("Failed to extract left channel")
             
         # Extract right channel (should be system audio)
         right_cmd = [
@@ -77,9 +77,9 @@ def test_audio_files():
         
         result = subprocess.run(right_cmd, capture_output=True, timeout=10)
         if result.returncode == 0:
-            print("✅ Right channel (SYSTEM) extracted → test_system_channel.wav")
+            print("Right channel (SYSTEM) extracted -> test_system_channel.wav")
         else:
-            print("❌ Failed to extract right channel")
+            print("Failed to extract right channel")
             
         # Convert original to WAV for easier playback
         wav_cmd = [
@@ -89,36 +89,36 @@ def test_audio_files():
         
         result = subprocess.run(wav_cmd, capture_output=True, timeout=10)
         if result.returncode == 0:
-            print("✅ Full stereo converted → test_stereo_full.wav")
+            print("Full stereo converted -> test_stereo_full.wav")
         else:
-            print("❌ Failed to convert to WAV")
+            print("Failed to convert to WAV")
             
     except Exception as e:
-        print(f"❌ Error extracting channels: {e}")
+        print(f"Error extracting channels: {e}")
     
     # Show test files created
     test_files = glob.glob("test_*.wav")
     if test_files:
-        print(f"\n🎵 TEST FILES CREATED:")
+        print(f"\nTEST FILES CREATED:")
         print("-" * 30)
         for file in test_files:
             size = os.path.getsize(file)
-            print(f"  📄 {file} ({size} bytes)")
+            print(f"  {file} ({size} bytes)")
     
-    print(f"\n🎧 HOW TO TEST:")
+    print(f"\nHOW TO TEST:")
     print("-" * 30)
     print("1. Play 'test_stereo_full.wav' → Should hear both mic + system")
     print("2. Play 'test_mic_channel.wav' → Should hear only microphone audio")  
     print("3. Play 'test_system_channel.wav' → Should hear only system audio")
-    print("\n💡 Use Windows Media Player, VLC, or any audio player")
-    print("💡 Or double-click the .wav files to play them")
+    print("\nUse Windows Media Player, VLC, or any audio player")
+    print("Or double-click the .wav files to play them")
     
-    print(f"\n📈 SUMMARY:")
+    print(f"\nSUMMARY:")
     print("-" * 30)
-    print(f"📁 Total files: {len(ogg_files)}")
-    print(f"📊 Latest file: {latest_file.name}")
-    print(f"🎯 Format: Opus in OGG, Stereo, ~500ms chunks")
-    print(f"🔊 Channels: Left=Mic, Right=System")
+    print(f"Total files: {len(ogg_files)}")
+    print(f"Latest file: {latest_file.name}")
+    print(f"Format: Opus in OGG, Stereo, ~500ms chunks")
+    print(f"Channels: Left=Mic, Right=System")
 
 if __name__ == "__main__":
     test_audio_files()
