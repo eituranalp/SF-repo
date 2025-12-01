@@ -1,17 +1,17 @@
 """
-AI Sales Funnel Call Assistant - Real-time Audio Client
+Real-time Audio Client
 
-This client captures dual-channel audio (system audio + microphone) and streams
+This client captures system audio + microphone and streams
 it to the transcription server for real-time speech-to-text processing.
 
 Requirements:
-- Voicemeeter (virtual audio mixer) for audio routing
-- System audio routed to "Voicemeeter Out B1"  
-- Microphone routed to "Voicemeeter Out B2"
+Voicemeeter (virtual audio mixer) for audio routing
+System audio routed to "Voicemeeter Out B1"  
+Microphone routed to "Voicemeeter Out B2"
 
 The client combines both audio sources into a stereo stream:
-- Left channel: Microphone audio
-- Right channel: System audio (calls, meetings, etc.)
+Left channel: Microphone audio
+Right channel: System audio
 """
 
 import asyncio
