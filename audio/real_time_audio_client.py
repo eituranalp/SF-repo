@@ -23,14 +23,14 @@ import sys
 import threading
 import time
 
-# === Audio Configuration ===
-SYSTEM_DEVICE_NAME = "Voicemeeter Out B1"  # Voicemeeter system audio output
-MIC_DEVICE_NAME = "Voicemeeter Out B2"     # Voicemeeter microphone output
-SAMPLE_RATE = 16000                        # 16kHz for optimal Deepgram performance
-CHANNELS = 1                               # Each input is mono (combined to stereo)
+#Audio Configuration
+SYSTEM_DEVICE_NAME = "Voicemeeter Out B1" 
+MIC_DEVICE_NAME = "Voicemeeter Out B2"
+SAMPLE_RATE = 16000                        #16kHz optimal
+CHANNELS = 1                               #Each input is mono (combined to stereo)
 
-# Configurable chunk duration (ms). Defaults to 200ms. 
-# Set env AUDIO_CHUNK_MS to override (e.g., 100 for lower latency)
+#Configurable chunk duration. Defaults to 200ms. 
+#Set env AUDIO_CHUNK_MS to override(100 for lower latency)
 CHUNK_DURATION_MS = int(os.getenv("AUDIO_CHUNK_MS", "200"))
 CHUNK_DURATION_SEC = CHUNK_DURATION_MS / 1000.0
 BUFFER_SIZE = int(SAMPLE_RATE * CHUNK_DURATION_SEC)
@@ -59,7 +59,7 @@ def find_device_index(name):
             print(f"   {i}: {d['name']}")
     return None
 
-# Device setup
+#Device setup
 system_index = find_device_index(SYSTEM_DEVICE_NAME)
 mic_index = find_device_index(MIC_DEVICE_NAME)
 
@@ -67,7 +67,7 @@ if system_index is None or mic_index is None:
     print("Required audio devices not found. Exiting.")
     sys.exit(1)
 
-# Audio buffers
+#Audio buffers
 system_buffer = []
 mic_buffer = []
 audio_lock = threading.Lock()
@@ -96,29 +96,29 @@ async def stream_audio():
         print("Connected! Starting audio streaming...")
         
         while True:
-            # Wait for the configured amount of audio data
+            #Wait for the configured amount of audio data
             await asyncio.sleep(CHUNK_DURATION_SEC)
             
             with audio_lock:
                 if len(mic_buffer) < BUFFER_SIZE or len(system_buffer) < BUFFER_SIZE:
                     continue
                     
-                # Get the configured chunk of both microphone and system audio
+                #Get the configured chunk of both microphone and system audio
                 mic_chunk = np.array(mic_buffer[:BUFFER_SIZE], dtype=np.int16)
                 sys_chunk = np.array(system_buffer[:BUFFER_SIZE], dtype=np.int16)
                 
-                # Remove used data
+                #Remove used data
                 del mic_buffer[:BUFFER_SIZE]
                 del system_buffer[:BUFFER_SIZE]
             
-            # Create stereo PCM: mic=left channel, system=right channel
+            #Create stereo PCM: mic=left channel, system=right channel
             stereo_audio = np.column_stack((mic_chunk, sys_chunk))
             pcm_data = stereo_audio.tobytes()
             
             chunk_count += 1
             print(f"Sending chunk #{chunk_count}: {len(pcm_data)} bytes (~{CHUNK_DURATION_MS}ms)")
             
-            # Send raw PCM data
+            #Send raw PCM data
             if pcm_data and len(pcm_data) > 0:
                 await ws.send(pcm_data)
             else:
@@ -134,7 +134,7 @@ async def main():
     print("=" * 30)
     
     try:
-        # Start both audio streams
+        #Start both audio streams
         sys_stream = sd.InputStream(
             device=system_index, 
             samplerate=SAMPLE_RATE,
