@@ -1,16 +1,9 @@
 """
-AI Sales Funnel Call Assistant - Real-time Audio Transcription Server
+Real-time Audio Transcription Server
 
 This FastAPI server handles real-time audio transcription using Deepgram API.
 It receives dual-channel audio streams from clients and processes them for 
 real-time speech-to-text conversion with channel separation.
-
-Features:
-- WebSocket-based audio streaming
-- Dual-channel audio processing (system audio + microphone)
-- Real-time transcription via Deepgram API
-- Interim and final transcription results
-- Audio debug functionality for development
 """
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -24,21 +17,21 @@ import datetime
 import wave
 from array import array
 
-# Load environment variables
+#Load environment variables
 load_dotenv()
 
 app = FastAPI(title="AI Sales Funnel - Audio Transcription Server")
 
-# === Configuration ===
-# Output directory for transcription files
+#Config
+#Output directory for transcription files
 TRANSCRIPTION_OUTPUT_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / "transcriptions"
 TRANSCRIPTION_OUTPUT_DIR.mkdir(exist_ok=True)
 
-# Directory to write debug WAV snippets per channel (for development)
+#Directory to write debug WAV snippets per channel
 AUDIO_CHUNKS_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / "audio_chunks"
 AUDIO_CHUNKS_DIR.mkdir(exist_ok=True)
 
-# In-memory store for latest interim transcripts (per channel)
+#In-memory store for latest interim transcripts (per channel)
 LATEST_INTERIM = {
     0: {"transcript": "", "confidence": 0.0, "timestamp": ""},  # Channel 0: Microphone
     1: {"transcript": "", "confidence": 0.0, "timestamp": ""}   # Channel 1: System Audio
@@ -49,25 +42,25 @@ async def get_interim():
     """Return the latest interim transcript for each channel."""
     return {"channels": LATEST_INTERIM}
 
-# === Deepgram API Configuration ===
+#Deepgram API Configuration
 DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
 if not DEEPGRAM_API_KEY:
     raise ValueError("DEEPGRAM_API_KEY environment variable is required")
 
 DEEPGRAM_WS_URL = "wss://api.deepgram.com/v1/listen"
 DEEPGRAM_PARAMS = {
-    "encoding": "linear16",      # 16-bit PCM encoding
-    "sample_rate": 16000,        # 16kHz sample rate
-    "channels": 2,               # Stereo audio (mic + system)
-    "multichannel": "true",      # Enable channel separation
-    "interim_results": "true",   # Get real-time interim results
-    "punctuate": "true"          # Add punctuation to transcripts
+    "encoding": "linear16",      #16-bit PCM encoding
+    "sample_rate": 16000,        #16kHz sample rate
+    "channels": 2,               #Stereo audio (mic + system)
+    "multichannel": "true",      #Enable channel separation
+    "interim_results": "true",   #Get real-time interim results
+    "punctuate": "true"          #Add punctuation to transcripts
 }
 
-# === Debug Configuration (Development) ===
+#Debug Configuration (development)
 AUDIO_DEBUG = os.getenv("AUDIO_DEBUG", "false").lower() in ("1", "true", "yes", "on")
-AUDIO_DEBUG_SNIPPET_MS = int(os.getenv("AUDIO_DEBUG_SNIPPET_MS", "2000"))  # Length per WAV snippet
-AUDIO_DEBUG_MAX_SNIPPETS = int(os.getenv("AUDIO_DEBUG_MAX_SNIPPETS", "30"))  # Max snippets per channel
+AUDIO_DEBUG_SNIPPET_MS = int(os.getenv("AUDIO_DEBUG_SNIPPET_MS", "2000"))  #Length per WAV snippet
+AUDIO_DEBUG_MAX_SNIPPETS = int(os.getenv("AUDIO_DEBUG_MAX_SNIPPETS", "30"))  #Max snippets per channel
 
 def write_transcription_to_file(channel_num: int, transcript: str, confidence: float):
     """Write transcription to the appropriate channel file"""
@@ -93,7 +86,7 @@ def write_wav_mono(file_path: Path, sample_rate: int, data_bytes: bytes):
     """Write mono 16-bit PCM bytes to a WAV file."""
     with wave.open(str(file_path), "wb") as wf:
         wf.setnchannels(1)
-        wf.setsampwidth(2)  # 16-bit PCM
+        wf.setsampwidth(2)  #16-bit PCM
         wf.setframerate(sample_rate)
         wf.writeframes(data_bytes)
 
@@ -105,47 +98,47 @@ async def audio_endpoint(websocket: WebSocket):
     if AUDIO_DEBUG:
         print(f"Audio debug mode enabled: Writing {AUDIO_DEBUG_SNIPPET_MS}ms WAV snippets to {AUDIO_CHUNKS_DIR}")
     
-    # Initialize/clear channel files for this session
+    #Initialize/clear channel files for this session
     for channel_num in [0, 1]:
         channel_file = TRANSCRIPTION_OUTPUT_DIR / f"channel_{channel_num}.txt"
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(channel_file, "w", encoding="utf-8") as f:
             f.write(f"=== New Session Started at {timestamp} ===\n\n")
         print(f"Initialized {channel_file.name}")
-        # Initialize interim files and in-memory state
+        #Initialize interim files and in-memory state
         LATEST_INTERIM[channel_num] = {"transcript": "", "confidence": 0.0, "timestamp": ""}
         interim_file = TRANSCRIPTION_OUTPUT_DIR / f"channel_{channel_num}_interim.txt"
         with open(interim_file, "w", encoding="utf-8") as f:
             f.write(f"=== Interim Initialized at {timestamp} ===\n")
 
-    # Debug buffers and counters (per connection)
+    #Debug buffers and counters
     debug_left_buffer = bytearray()
     debug_right_buffer = bytearray()
     debug_snippet_idx = {0: 0, 1: 0}
     target_bytes_per_channel = int(DEEPGRAM_PARAMS["sample_rate"] * (AUDIO_DEBUG_SNIPPET_MS / 1000.0) * 2)
     
-    # Build Deepgram WebSocket URL with parameters
+    #Build Deepgram WebSocket URL with parameters
     params_str = "&".join([f"{k}={v}" for k, v in DEEPGRAM_PARAMS.items()])
     dg_url = f"{DEEPGRAM_WS_URL}?{params_str}"
     
     try:
-        # Connect to Deepgram WebSocket
+        #Connect to Deepgram WebSocket
         async with aiohttp.ClientSession() as session:
             headers = {"Authorization": f"Token {DEEPGRAM_API_KEY}"}
             
             async with session.ws_connect(dg_url, headers=headers) as dg_ws:
                 print("Connected to Deepgram WebSocket")
                 
-                # Create tasks for handling both directions
+                #Create tasks for handling both directions
                 async def forward_audio():
                     """Forward audio from client to Deepgram"""
                     try:
                         while True:
-                            # Receive audio data from client
+                            #Receive audio data from client
                             audio_data = await websocket.receive_bytes()
                             
                             if audio_data:
-                                # Debug: deinterleave and write periodic WAV snippets per channel
+                                #Debug: deinterleave and write periodic WAV snippets per channel
                                 if AUDIO_DEBUG:
                                     try:
                                         samples = array('h')
@@ -154,7 +147,7 @@ async def audio_endpoint(websocket: WebSocket):
                                         right_samples = samples[1::2]
                                         debug_left_buffer.extend(left_samples.tobytes())
                                         debug_right_buffer.extend(right_samples.tobytes())
-                                        # Flush to WAV when enough data accumulated
+                                        #Flush to WAV when enough data accumulated
                                         for ch, buf in ((0, debug_left_buffer), (1, debug_right_buffer)):
                                             while len(buf) >= target_bytes_per_channel and debug_snippet_idx[ch] < AUDIO_DEBUG_MAX_SNIPPETS:
                                                 idx = debug_snippet_idx[ch]
@@ -164,15 +157,15 @@ async def audio_endpoint(websocket: WebSocket):
                                                 debug_snippet_idx[ch] += 1
                                     except Exception as e:
                                         print(f"Audio debug write failed: {e}")
-                                # Send audio data to Deepgram
+                                #Send audio data to Deepgram
                                 await dg_ws.send_bytes(audio_data)
                                 
                     except WebSocketDisconnect:
                         print("Client disconnected")
-                        # Send finalize message to Deepgram before closing
+                        #Send finalize message to Deepgram before closing
                         await dg_ws.send_str('{"type":"Finalize"}')
-                        await asyncio.sleep(1)  # Give time for final responses
-                        # On disconnect, flush any remaining partial buffers as final snippets
+                        await asyncio.sleep(1)  #Give time for final responses
+                        #On disconnect, flush any remaining partial buffers as final snippets
                         if AUDIO_DEBUG:
                             try:
                                 if len(debug_left_buffer) > 0 and debug_snippet_idx[0] < AUDIO_DEBUG_MAX_SNIPPETS:
@@ -197,7 +190,7 @@ async def audio_endpoint(websocket: WebSocket):
                                 try:
                                     response = json.loads(msg.data)
                                     
-                                    # Check if this is a transcription result
+                                    #Check if this is a transcription result
                                     if "channel" in response and "alternatives" in response["channel"]:
                                         channel_data = response["channel"]
                                         alternatives = channel_data["alternatives"]
@@ -209,18 +202,18 @@ async def audio_endpoint(websocket: WebSocket):
                                             channel_index = response.get("channel_index", [0])[0]
                                             
                                             if transcript and transcript.strip():
-                                                # Print transcription with channel info
+                                                #Print transcription with channel info
                                                 status = "FINAL" if is_final else "INTERIM"
                                                 print(f"[{status}] Channel {channel_index}: {transcript} (confidence: {confidence:.2f})")
                                                 
-                                                # Update interim or write final
+                                                #Update interim or write final
                                                 if is_final:
                                                     write_transcription_to_file(channel_index, transcript, confidence)
-                                                    # Clear interim state after finalizing
+                                                    #Clear interim state after finalizing
                                                     LATEST_INTERIM[channel_index] = {"transcript": "", "confidence": 0.0, "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                                                     write_interim_to_file(channel_index, "", 0.0)
                                                 else:
-                                                    # Store and write the latest interim
+                                                    #Store and write the latest interim
                                                     LATEST_INTERIM[channel_index] = {
                                                         "transcript": transcript,
                                                         "confidence": float(confidence or 0.0),
@@ -228,7 +221,7 @@ async def audio_endpoint(websocket: WebSocket):
                                                     }
                                                     write_interim_to_file(channel_index, transcript, confidence)
                                     
-                                    # Handle multichannel results
+                                    #Handle multichannel results
                                     elif "results" in response and "channels" in response["results"]:
                                         channels = response["results"]["channels"]
                                         is_final = response.get("is_final", False)
@@ -241,7 +234,7 @@ async def audio_endpoint(websocket: WebSocket):
                                                 if transcript:
                                                     print(f"[{status}] Channel {i}: {transcript} (confidence: {confidence:.2f})")
                                                     
-                                                    # Update interim or write final
+                                                    #Update interim or write final
                                                     if is_final and transcript.strip():
                                                         write_transcription_to_file(i, transcript, confidence)
                                                         LATEST_INTERIM[i] = {"transcript": "", "confidence": 0.0, "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -266,7 +259,7 @@ async def audio_endpoint(websocket: WebSocket):
                     except Exception as e:
                         print(f"Error handling transcriptions: {e}")
                 
-                # Run both tasks concurrently
+                #Run both tasks
                 await asyncio.gather(
                     forward_audio(),
                     handle_transcriptions(),
