@@ -1,119 +1,116 @@
-# AI Sales Funnel Call Assistant
+# Sales Funnel Call Assistant
 
 ## Overview
 
-This project is a **work-in-progress** real-time sales funnel call assistant. It captures audio from calls (Zoom/Meet/Teams), transcribes speech in real-time using AI, and is designed to provide AI-driven guidance aligned to custom sales funnel stages.
+This project is a **work-in-progress** real-time call assistant designed to support structured sales funnel conversations. It captures audio from calls (Zoom, Meet, Teams), transcribes speech in real time, and aligns the output to custom sales funnel stages.
 
-The system enables real-time analysis of sales conversations by separating and transcribing both the salesperson (microphone) and prospect (system audio) channels simultaneously.
+The system processes and separates both the salesperson (microphone) and prospect (system audio) channels, enabling clear transcription and later analysis of sales conversations.
 
 ## Current Progress
 
-✅ **Completed:**
-- Real-time dual-channel audio capture and streaming
-- Integration with Deepgram API for speech-to-text transcription
-- Channel separation (microphone vs system audio)
-- WebSocket-based audio streaming architecture
-- Interim and final transcription results processing
-- Audio debugging tools for development
+**Completed:**
+- Real-time dual-channel audio capture and streaming  
+- Integration with Deepgram API for speech-to-text transcription  
+- Channel separation (microphone vs. system audio)  
+- WebSocket-based audio streaming architecture  
+- Interim and final transcription result handling  
+- Audio debugging and monitoring utilities  
 
-🚧 **In Development:**
-- AI-powered sales funnel stage detection
-- Real-time coaching and guidance system
-- Custom sales playbook integration
-- Advanced analytics and conversation insights
+**In Development:**
+- Funnel stage detection and classification  
+- Real-time guidance system  
+- Custom sales playbook integration  
+- Conversation analytics and reporting  
 
 ## Tech Stack
 
 ### Core Technologies
-- **Python 3.8+** - Primary development language
-- **FastAPI** - High-performance async web framework for the transcription server
-- **WebSockets** - Real-time bidirectional communication
-- **Deepgram API** - Advanced speech-to-text transcription service
+- **Python 3.8+** – Primary development language  
+- **FastAPI** – Asynchronous web framework for the transcription server  
+- **WebSockets** – Real-time bidirectional communication  
+- **Deepgram API** – Speech-to-text transcription service  
 
 ### Audio Processing
-- **SoundDevice** - Python audio I/O library for capturing system and microphone audio
-- **NumPy** - Numerical computing for audio data processing
-- **Voicemeeter** - Virtual audio mixer for audio routing and channel separation
-- **FFmpeg** - Multimedia framework (used in testing utilities)
+- **SoundDevice** – Audio capture for system and microphone input  
+- **NumPy** – Numerical operations for audio data handling  
+- **Voicemeeter** – Virtual audio mixer for routing and separation. This is for temporary use.
+- **FFmpeg** – Multimedia framework used in testing utilities  
 
 ### Additional Libraries
-- **asyncio** - Asynchronous programming for handling concurrent audio streams
-- **aiohttp** - Async HTTP client for Deepgram WebSocket connections
-- **python-dotenv** - Environment variable management
+- **asyncio** – Asynchronous stream management  
+- **aiohttp** – Async HTTP client for WebSocket connections  
+- **python-dotenv** – Environment configuration management  
 
 ## Project Structure
 
-```
-├── audio/                          # Main application components
-│   ├── transcription_server.py     # FastAPI transcription server
-│   ├── real_time_audio_client.py   # Audio capture client
-│   ├── server_requirements.txt     # Server dependencies
-│   ├── client_requirements.txt     # Client dependencies
-│   ├── tests/                      # Test scripts and utilities
-│   └── transcriptions/             # Transcribed conversations output
+├── audio/ # Application components
+│ ├── transcription_server.py # FastAPI transcription server
+│ ├── real_time_audio_client.py # Audio capture client
+│ ├── server_requirements.txt # Server dependencies
+│ ├── client_requirements.txt # Client dependencies
+│ ├── tests/ # Test scripts and utilities
+│ └── transcriptions/ # Transcribed conversation outputs
 │
-└── setup/                          # Setup docs and utilities
-    ├── SETUP.txt                   # Detailed setup instructions
-    ├── LICENSE                     # MIT license
-    └── ffmpeg.exe                  # Audio processing utility
-```
+└── setup/ # Setup documentation and utilities
+├── SETUP.txt # Detailed setup instructions
+├── LICENSE # License file
+└── ffmpeg.exe # Audio processing utility
 
 ## Quick Start
 
 ### Prerequisites
-- Python 3.8+
-- [Voicemeeter](https://vb-audio.com/Voicemeeter/) for audio routing
-- [Deepgram API Key](https://deepgram.com/) for speech transcription
+- Python 3.8+  
+- [Voicemeeter](https://vb-audio.com/Voicemeeter/) for audio routing  
+- [Deepgram API Key](https://deepgram.com/) for speech transcription  
 
 ### Setup
-1. **Clone and navigate to the project:**
-   ```bash
-   git clone <repository-url>
-   cd salesFunnel-backend
-   ```
 
-2. **Configure environment:**
-   ```bash
-   # Create .env file with your Deepgram API key
-   echo "DEEPGRAM_API_KEY=your_actual_deepgram_api_key" > .env
-   ```
+1. **Clone and navigate to the project
+2. Configure environment: echo "DEEPGRAM_API_KEY=your_actual_deepgram_api_key" > .env
+3. Start the transcription server: install server_requirements.txt, run python transcription_server.py
+4. Configure Voicemeeter routing: Route system audio to "Voicemeeter Out B1", Route microphone to "Voicemeeter Out B2".
+5. Start the audio client: install client_requirements.txt, run python real_time_audio_client.py
 
-3. **Start the transcription server:**
-   ```bash
-   cd audio
-   python -m venv .venv
-   source .venv/Scripts/activate  # Windows Git Bash
-   pip install -r server_requirements.txt
-   python transcription_server.py
-   ```
-
-4. **Configure Voicemeeter audio routing:**
-   - Route system audio to "Voicemeeter Out B1"
-   - Route microphone to "Voicemeeter Out B2"
-
-5. **Start the audio client (new terminal):**
-   ```bash
-   cd audio
-   source .venv/Scripts/activate  # Activate same venv
-   pip install -r client_requirements.txt
-   python real_time_audio_client.py
-   ```
-
-For detailed setup instructions, see [`setup/SETUP.txt`](setup/SETUP.txt).
+For more detailed setup instructions, see setup/SETUP.txt
 
 ## Features
 
-- Real-time dual-channel audio capture (microphone + system audio)
-- WebSocket-based streaming to Deepgram API  
-- Channel separation for conversation analysis
-- Live interim and final transcription results
-- REST API for accessing latest transcriptions (`GET /interim`)
-- Audio debugging tools for development
+- Real-time dual-channel audio capture (microphone and system audio)
+- WebSocket-based audio streaming to a transcription server
+- Integration with Deepgram for speech-to-text
+- Channel separation for clear conversation analysis
+- Live interim and final transcription output
+- REST endpoint for accessing the latest transcription (`GET /interim`)
+- Audio debugging and monitoring utilities for development
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](setup/LICENSE) file for details.
+This project uses a non-commercial license.  
+See the LICENSE file for details.
 
----
+## Project Status
 
-**Note:** This is a work-in-progress project focused on building the foundation for AI-assisted sales conversations. The current implementation demonstrates real-time audio transcription capabilities with plans for advanced sales funnel intelligence.
+This repository is an active work in progress.  
+Current functionality demonstrates:
+- Real-time audio capture
+- Dual-channel separation
+- Live transcription via Deepgram
+- Basic server/client architecture over WebSockets
+
+Planned additions include:
+- Funnel stage tracking and classification
+- Real-time guidance logic
+- Custom sales playbook integration
+- Conversation analytics and metrics
+- Improved UI for live call assistance
+
+## Contributing
+
+This project is currently under solo development.  
+Suggestions, issue reports, or feedback are welcome through GitHub Issues.
+
+## Disclaimer
+
+This project is intended for personal, educational, and experimental use.  
+Commercial use is not permitted without explicit permission.
+
